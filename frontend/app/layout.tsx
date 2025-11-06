@@ -38,9 +38,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${archivoBlack.variable}`}>
-      <body className="bg-[#0d1117] text-white antialiased">
+    <html lang="en" className={`${inter.variable}`}>
+      <body className="bg-[#0d1117] text-white ">
+        <main className="mx-auto container">
+
         {children}
+        </main>
       </body>
     </html>
   );

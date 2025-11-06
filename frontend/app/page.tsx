@@ -5,7 +5,7 @@ export default function Home() {
    
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-black dark:bg-black sm:items-start">
         
-        <h1 className="gradient-title text-9xl text-white">Hh</h1>
+        <h1 className="gradient-title text-9xl text-white">Mozaik</h1>
       </main>
 
   );
