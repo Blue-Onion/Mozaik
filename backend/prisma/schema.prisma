@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================
+// ENUMS
+// ===============================
+enum ProjectStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ===============================
+// USER MODEL
+// ===============================
+model User {
+  id          String  @id @default(cuid())
+  name        String
+  email       String  @unique
+  imageUrl    String?
+  plan        String?
+  creditsLeft Int     @default(0)
+  usageCount  Int     @default(0)
+
+  projects    Project[]
+  chatHistory ChatHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ===============================
+// PROJECT MODEL
+// ===============================
+model Project {
+  id           String        @id @default(cuid())
+  userId       String
+  projectName  String
+  description  String?
+  thumbnailUrl String?
+  textInput    String?
+  settingsJson Json?
+  status       ProjectStatus @default(PENDING)
+
+  videos Video[]
+  chats  ChatHistory[]
+  scenes Scene[]
+  assets Asset[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ===============================
+// VIDEO MODEL
+// ===============================
+model Video {
+  id        String @id @default(cuid())
+  projectId String
+
+  sceneName          String?
+  videoUrl           String
+  duration           Float?
+  fps                Int?
+  resolution         String?
+  renderSettingsJson Json?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// ===============================
+// CHAT HISTORY
+// ===============================
+model ChatHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String
+  role      ChatRole
+  message   String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// ===============================
+// SCENE MODEL
+// ===============================
+model Scene {
+  id        String @id @default(cuid())
+  projectId String
+
+  name    String
+  content String?
+  order   Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+// ===============================
+// ASSET MODEL
+// ===============================
+model Asset {
+  id        String @id @default(cuid())
+  projectId String
+
+  type String
+  url  String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
