@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,127 +7,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===============================
-// ENUMS
-// ===============================
-enum ProjectStatus {
-  PENDING
-  PROCESSING
-  DONE
-  FAILED
-}
+// --------------------------------------------------------
+// USERS
+// --------------------------------------------------------
 
-enum ChatRole {
-  USER
-  ASSISTANT
-  SYSTEM
-}
-
-// ===============================
-// USER MODEL
-// ===============================
 model User {
-  id          String  @id @default(cuid())
-  name        String
-  email       String  @unique
-  imageUrl    String?
-  plan        String?
-  creditsLeft Int     @default(0)
-  usageCount  Int     @default(0)
+  id        String    @id @default(uuid())
+  name      String?
+  email     String    @unique
+  password  String
 
-  projects    Project[]
-  chatHistory ChatHistory[]
+  prompts   Prompt[]
+  videos    Video[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
 }
 
-// ===============================
-// PROJECT MODEL
-// ===============================
-model Project {
-  id           String        @id @default(cuid())
-  userId       String
-  projectName  String
-  description  String?
-  thumbnailUrl String?
-  textInput    String?
-  settingsJson Json?
-  status       ProjectStatus @default(PENDING)
+// --------------------------------------------------------
+// PROMPTS (user writes a prompt -> becomes a manim script)
+// --------------------------------------------------------
 
-  videos Video[]
-  chats  ChatHistory[]
-  scenes Scene[]
-  assets Asset[]
+model Prompt {
+  id          String         @id @default(uuid())
+  text        String          // The prompt the user writes
+  generatedCode String?        // Auto-generated manim Python code
+  status      PromptStatus    @default(PENDING)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User            @relation(fields: [userId], references: [id])
+  userId      String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  video       Video?
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
-// ===============================
-// VIDEO MODEL
-// ===============================
+// --------------------------------------------------------
+// VIDEO FILE (output of prompt → manim render)
+// --------------------------------------------------------
+
 model Video {
-  id        String @id @default(cuid())
-  projectId String
+  id          String    @id @default(uuid())
+  videoUrl    String     // S3 / Cloudflare / local storage link
+  durationSec Int?
+  resolution  String?    // e.g. 1080p, 720p
 
-  sceneName          String?
-  videoUrl           String
-  duration           Float?
-  fps                Int?
-  resolution         String?
-  renderSettingsJson Json?
+  prompt      Prompt     @relation(fields: [promptId], references: [id])
+  promptId    String     @unique
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String
 
-  createdAt DateTime @default(now())
+  createdAt   DateTime   @default(now())
 }
 
-// ===============================
-// CHAT HISTORY
-// ===============================
-model ChatHistory {
-  id        String   @id @default(cuid())
-  userId    String
-  projectId String
-  role      ChatRole
-  message   String
+// --------------------------------------------------------
+// ENUMS
+// --------------------------------------------------------
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-}
-
-// ===============================
-// SCENE MODEL
-// ===============================
-model Scene {
-  id        String @id @default(cuid())
-  projectId String
-
-  name    String
-  content String?
-  order   Int     @default(0)
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-}
-
-// ===============================
-// ASSET MODEL
-// ===============================
-model Asset {
-  id        String @id @default(cuid())
-  projectId String
-
-  type String
-  url  String
-
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
+enum PromptStatus {
+  PENDING
+  GENERATING_CODE   // AI is creating manim code
+  RENDERING_VIDEO   // manim is rendering
+  COMPLETED
+  FAILED
 }
