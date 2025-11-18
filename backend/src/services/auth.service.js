@@ -50,7 +50,7 @@ export const verifyToken = (token) => {
  * Register a new user
  */
 export const registerUser = async (userData) => {
-  const { email, password, name } = userData;
+  const { email, password, name, imageUrl } = userData;
 
   // Check if user already exists
   const existingUser = await db.user.findUnique({
@@ -70,11 +70,13 @@ export const registerUser = async (userData) => {
       email,
       password: hashedPassword,
       name: name || null,
+      imageUrl: imageUrl || null,
     },
     select: {
       id: true,
       email: true,
       name: true,
+      imageUrl: true,
       createdAt: true,
     },
   });
@@ -111,6 +113,7 @@ export const loginUser = async (email, password) => {
       id: user.id,
       email: user.email,
       name: user.name,
+      imageUrl: user.imageUrl,
       createdAt: user.createdAt,
     },
     token,
@@ -127,6 +130,7 @@ export const getUserById = async (userId) => {
       id: true,
       email: true,
       name: true,
+      imageUrl: true,
       createdAt: true,
     },
   });

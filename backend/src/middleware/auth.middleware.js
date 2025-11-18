@@ -15,6 +15,7 @@ export const authenticate = async (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
+        success: false,
         error: 'Authentication required',
       });
     }
@@ -24,6 +25,7 @@ export const authenticate = async (req, res, next) => {
 
     if (!decoded || !decoded.userId) {
       return res.status(401).json({
+        success: false,
         error: 'Invalid or expired token',
       });
     }
@@ -33,6 +35,7 @@ export const authenticate = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({
+        success: false,
         error: 'User not found',
       });
     }
@@ -43,6 +46,7 @@ export const authenticate = async (req, res, next) => {
   } catch (error) {
     logger.error('Authentication error:', error);
     return res.status(401).json({
+      success: false,
       error: 'Authentication failed',
     });
   }
@@ -88,6 +92,7 @@ export const requireValidMe = async (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
+        success: false,
         error: 'Authentication required',
       });
     }
@@ -97,6 +102,7 @@ export const requireValidMe = async (req, res, next) => {
 
     if (!decoded || !decoded.userId) {
       return res.status(401).json({
+        success: false,
         error: 'Invalid or expired token',
       });
     }
@@ -106,6 +112,7 @@ export const requireValidMe = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({
+        success: false,
         error: 'User not found',
       });
     }
@@ -117,6 +124,7 @@ export const requireValidMe = async (req, res, next) => {
   } catch (error) {
     logger.error('RequireValidMe middleware error:', error);
     return res.status(401).json({
+      success: false,
       error: 'Authentication failed',
     });
   }

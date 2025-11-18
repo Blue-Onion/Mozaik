@@ -16,6 +16,7 @@ model User {
   name      String?
   email     String    @unique
   password  String
+  imageUrl  String?
 
   prompts   Prompt[]
   videos    Video[]

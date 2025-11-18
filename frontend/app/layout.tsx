@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+const inter = Inter({ subsets: ["latin"] });
 const archivoBlack = Archivo_Black({
-  variable: "--font-archivo-black",
-  weight: "400",
   subsets: ["latin"],
-  display: "swap",
+  weight: "400",
+  variable: "--font-archivo-black",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +24,6 @@ export const metadata: Metadata = {
     "Mozaik",
   ],
   authors: [{ name: "Blue Onion" }],
-
 };
 
 export default function RootLayout({
@@ -38,13 +32,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable}`}>
-      <body className="bg-[#0d1117] text-white ">
-        <main className="mx-auto container">
-
+    <html lang="en" className={`${archivoBlack.variable} ${inter.className}`}>
+    <body className="relative  text-white">
+      <header className="fixed top-8 left-0 w-full z-50">
+        <Navbar />
+      </header>
+  
+      <main className="min-h-screen">
         {children}
-        </main>
-      </body>
-    </html>
+      </main>
+  
+      <footer></footer>
+    </body>
+  </html>
   );
 }
