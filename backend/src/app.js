@@ -6,6 +6,7 @@ import morganMiddleware from '#middleware/morgan.js';
 import logger from '#utils/logger.js';
 import authRoutes from '#routes/auth.route.js';
 import codeRoutes from '#routes/code.route.js';
+import projectRoutes from '#routes/project.route.js';
 const app = express();
 
 // Security middleware (Helmet)
@@ -35,6 +36,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/code', codeRoutes);
+app.use('/api/project', projectRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error({

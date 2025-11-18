@@ -20,6 +20,8 @@ model User {
 
   prompts   Prompt[]
   videos    Video[]
+  projects  Project[]
+  chatLogs  ChatHistory[]
 
   createdAt DateTime  @default(now())
 }
@@ -30,14 +32,17 @@ model User {
 
 model Prompt {
   id          String         @id @default(uuid())
-  text        String          // The prompt the user writes
-  generatedCode String?        // Auto-generated manim Python code
+  text        String          
+  generatedCode String?       
   status      PromptStatus    @default(PENDING)
 
   user        User            @relation(fields: [userId], references: [id])
   userId      String
+  project     Project?        @relation(fields: [projectId], references: [id])
+  projectId   String?
 
   video       Video?
+  chatLogs    ChatHistory[]
 
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -58,8 +63,49 @@ model Video {
 
   user        User       @relation(fields: [userId], references: [id])
   userId      String
+  project     Project?   @relation(fields: [projectId], references: [id])
+  projectId   String?
 
   createdAt   DateTime   @default(now())
+}
+
+// --------------------------------------------------------
+// PROJECTS
+// --------------------------------------------------------
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String
+
+  prompts     Prompt[]
+  videos      Video[]
+  chatLogs    ChatHistory[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+// --------------------------------------------------------
+// CHAT HISTORY
+// --------------------------------------------------------
+
+model ChatHistory {
+  id        String    @id @default(uuid())
+  role      ChatRole  @default(USER)
+  content   String
+
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  project   Project?  @relation(fields: [projectId], references: [id])
+  projectId String?
+  prompt    Prompt?   @relation(fields: [promptId], references: [id])
+  promptId  String?
+
+  createdAt DateTime  @default(now())
 }
 
 // --------------------------------------------------------
@@ -72,4 +118,10 @@ enum PromptStatus {
   RENDERING_VIDEO   // manim is rendering
   COMPLETED
   FAILED
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
 }

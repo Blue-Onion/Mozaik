@@ -4,7 +4,12 @@
 export const validate = (schema) => {
   return (req, res, next) => {
     try {
-      const validated = schema.parse(req.body);
+      const payload = {
+        ...req.body,
+        ...(req.user?.id ? { userId: req.user.id } : {}),
+      };
+
+      const validated = schema.parse(payload);
       req.body = validated;
       next();
     } catch (error) {
