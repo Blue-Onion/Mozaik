@@ -33,6 +33,8 @@
   },
   "homepage": "https://github.com/Blue-Onion/Mozaik#readme",
   "dependencies": {
+    "@google/genai": "^1.30.0",
+    "@google/generative-ai": "^0.24.1",
     "@neondatabase/serverless": "^1.0.1",
     "@prisma/client": "^6.19.0",
     "bcrypt": "^6.0.0",

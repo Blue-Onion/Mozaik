@@ -1,18 +1,13 @@
 import express from 'express';
 import { requireValidMe } from '#middleware/auth.middleware.js';
+import { validate } from '#middleware/validation.middleware.js';
+import { generateCode } from '#controllers/code.controller.js';
+import { generateCodeSchema } from '#validations/code.validation.js';
 
 const router = express.Router();
-router.use(requireValidMe)
-// Protected routes - require valid /api/auth/me status (200)
-router.post('/generate-code', (req, res) => {
-    const { code } = req.body;
-    const generatedCode = generateCode(code);
-    res.json({ code: generatedCode });
-});
-router.get('/get-generated-code', (req, res) => {
-    
-    res.json({ message: 'Hello, world!' });
-});
+router.use(requireValidMe);
 
+// Generate manim code by analyzing last 10 prompts in a project
+router.post('/generate-code', validate(generateCodeSchema), generateCode);
 
 export default router;
