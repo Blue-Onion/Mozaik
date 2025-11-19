@@ -1,4 +1,4 @@
-import { generateManimCode } from "#src/services/code.service.js";
+import { generateManimCode, debugManimCode } from "#src/services/code.service.js";
 import logger from '#utils/logger.js';
 
 /**
@@ -32,6 +32,32 @@ export const generateCode = async (req, res, next) => {
       });
     }
 
+    next(error);
+  }
+};
+
+/**
+ * Debug and fix generated manim code
+ */
+export const debugCode = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        error: 'Code is required',
+      });
+    }
+
+    const result = await debugManimCode(code);
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    logger.error('Debug code error:', error);
     next(error);
   }
 };
