@@ -12,10 +12,10 @@ const Navbar = () => {
         </Link>
         
         <div className="flex items-center gap-5">
-          <Link href={"/create"}>
+          <Link href={"/project"}>
             <Video className="" />
           </Link>
-          <Link href={"/create"}>
+          <Link href={"/project"}>
             <Button className="rounded-full text-black text-md p-4 border-2 border-lime-500 hover:bg-lime-400 bg-lime-200">
                 Start Creating
             </Button>

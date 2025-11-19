@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 const archivoBlack = Archivo_Black({
@@ -32,18 +32,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${archivoBlack.variable} ${inter.className}`}>
-    <body className="relative  text-white">
-      <header className="fixed top-8 left-0 w-full z-50">
-        <Navbar />
-      </header>
-  
-      <main className="min-h-screen">
-        {children}
-      </main>
-  
-      <footer></footer>
-    </body>
-  </html>
+    <ClerkProvider appearance={{}}>
+      <html lang="en" className={`${archivoBlack.variable} ${inter.className}`}>
+        <body className="relative text-black">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

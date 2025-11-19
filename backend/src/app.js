@@ -7,8 +7,14 @@ import logger from '#utils/logger.js';
 import authRoutes from '#routes/auth.route.js';
 import codeRoutes from '#routes/code.route.js';
 import projectRoutes from '#routes/project.route.js';
-
 import promptRoutes from '#routes/prompt.route.js';
+import videoRoutes from '#routes/video.route.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const app = express();
 
 // Security middleware (Helmet)
@@ -30,6 +36,9 @@ app.use(cookieParser());
 // HTTP request logging middleware (Morgan)
 app.use(morganMiddleware);
 
+// Serve static files (videos)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Health check route
 app.get('/health', (req, res) => {
   res.status(200).json({ message: 'ok', timestamp: new Date().toISOString() });
@@ -40,6 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/prompt', promptRoutes);
+app.use('/api/video', videoRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error({

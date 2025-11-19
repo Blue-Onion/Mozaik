@@ -47,7 +47,7 @@
 /* --- Gradient Title --- */
 .gradient-title {
   font-family: var(--font-archivo-black);
-  background: whitesmoke;
+  background: black;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

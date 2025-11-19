@@ -1,0 +1,60 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mozaik-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-pro}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - mozaik-network
+    restart: unless-stopped
+
+  manim:
+    build:
+      context: ./backend/docker/manim
+      dockerfile: Dockerfile
+    container_name: mozaik-manim
+    volumes:
+      - ./backend/uploads/videos:/manim/output
+    networks:
+      - mozaik-network
+    restart: unless-stopped
+    # This container runs on-demand via docker exec
+
+  db:
+    image: postgres:16-alpine
+    container_name: mozaik-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-mozaik}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mozaik-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  mozaik-network:
+    driver: bridge
+
