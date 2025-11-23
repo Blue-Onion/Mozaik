@@ -49,7 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/code', codeRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/prompt', promptRoutes);
-app.use('/api/video', videoRoutes);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error({
