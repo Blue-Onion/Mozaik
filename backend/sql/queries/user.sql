@@ -2,11 +2,13 @@
 INSERT INTO
     users (
         id,
+        Name,
+        Email,
         password,
         createdAt,
         updatedAt
     )
-VALUES ($1, $2, $3, $4) rETURNING id,
+VALUES ($1, $2, $3, $4,$5,$6) rETURNING id,
     name,
     createdAt,
     updatedAt;
