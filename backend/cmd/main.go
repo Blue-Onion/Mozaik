@@ -15,6 +15,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/middleware"
 
 	"github.com/Blue-Onion/RestApi-Go/handler/user"
+	vgeneration "github.com/Blue-Onion/RestApi-Go/handler/vGeneration"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 )
@@ -56,8 +57,12 @@ func main() {
 	userRoute.Post("/users", userHandler.HandleCreateUser)
 	userRoute.Post("/login", userHandler.HandleLogin)
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
+	videoRoute := chi.NewRouter()
+	videoRoute.Get("/gen", vgeneration.HandleVideoGeneration)
 
 	router.Mount("/api", userRoute)
+
+	router.Mount("/video", videoRoute)
 
 	server := http.Server{
 		Handler: router,
