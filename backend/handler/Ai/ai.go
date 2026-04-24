@@ -34,7 +34,7 @@ func getAiResponse() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	resp, err := client.Models.GenerateContent(ctx, "gemini-flash", genai.Text(PROMPT), nil)
+	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(PROMPT), nil)
 	if err != nil {
 		return "", err
 
