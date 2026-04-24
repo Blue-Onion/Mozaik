@@ -18,7 +18,6 @@ func generateVideo() {
 }
 
 func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
-	generateVideo()
 	handler.RespondWithJson(w, 200, map[string]string{
 		"Message": "LogOut Successfully",
 	})

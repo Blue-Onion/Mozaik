@@ -27,3 +27,9 @@ Thumbs.db
 dist
 build
 .Ds_Store
+
+# Manim/Python
+media/
+__pycache__/
+*.pyc
+.venv/

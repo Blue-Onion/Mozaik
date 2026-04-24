@@ -14,6 +14,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/middleware"
 
+	ai "github.com/Blue-Onion/RestApi-Go/handler/Ai"
 	"github.com/Blue-Onion/RestApi-Go/handler/user"
 	vgeneration "github.com/Blue-Onion/RestApi-Go/handler/vGeneration"
 	"github.com/go-chi/chi"
@@ -59,6 +60,7 @@ func main() {
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
 	videoRoute := chi.NewRouter()
 	videoRoute.Get("/gen", vgeneration.HandleVideoGeneration)
+	videoRoute.Get("/get-ai-res", ai.HandleAiGeneration)
 
 	router.Mount("/api", userRoute)
 
