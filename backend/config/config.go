@@ -14,6 +14,7 @@ type Config struct {
 	DbUrl     string
 	Port      string
 	JWTSecert string
+	ApiKey string
 }
 type ApiConfig struct {
 	UserRepo database.UserRepository
@@ -24,11 +25,13 @@ func LoadConfig() *Config {
 	dbUrl := os.Getenv("DATABASE_URL")
 	Port := os.Getenv("PORT")
 	Jwt := os.Getenv("JWT_SECERT")
+	apiKey:= os.Getenv("GOOGLE_API_KEY")
 
 	return &Config{
 		DbUrl:     dbUrl,
 		Port:      Port,
 		JWTSecert: Jwt,
+		ApiKey: apiKey,
 	}
 
 }
