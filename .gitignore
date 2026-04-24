@@ -26,7 +26,7 @@ Thumbs.db
 # Build
 dist
 build
-.Ds_Store
+.DS_Store
 
 # Manim/Python
 media/
