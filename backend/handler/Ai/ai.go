@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/Blue-Onion/RestApi-Go/config"
@@ -24,7 +25,7 @@ func HandleAiGeneration(w http.ResponseWriter, r *http.Request) {
 
 	handler.RespondWithJson(w, 200, res)
 }
-func getAiResponse(prompt string) (string, error) {
+func getAiResponse(userQuery string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -33,6 +34,18 @@ func getAiResponse(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	prompt := fmt.Sprintf(`You are an expert in Manim (Mathematical Animation Engine).
+
+Request: %s
+
+Rules (must follow):
+- Output ONLY raw Python code, no markdown, no backticks, no explanations
+- Always import: from manim import *
+- The main scene class must be named GeneratedScene and extend Scene
+- Implement the construct(self) method
+- Use only stable Manim CE API (v0.18+)
+- Keep animations clean and readable`, userQuery)
 	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(prompt), nil)
 	if err != nil {
 		return "", err
