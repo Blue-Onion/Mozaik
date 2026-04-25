@@ -60,7 +60,7 @@ func main() {
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
 	videoRoute := chi.NewRouter()
 	videoRoute.Get("/gen", vgeneration.HandleVideoGeneration)
-	videoRoute.Get("/get-ai-res", ai.HandleAiGeneration)
+	videoRoute.Post("/get-ai-res", ai.HandleAiGeneration)
 
 	router.Mount("/api", userRoute)
 

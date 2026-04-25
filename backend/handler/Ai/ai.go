@@ -2,22 +2,21 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/Blue-Onion/RestApi-Go/config"
 	"github.com/Blue-Onion/RestApi-Go/handler"
+	"github.com/Blue-Onion/RestApi-Go/model"
 	"google.golang.org/genai"
 )
 
-const PROMPT = "Explain how human work in 10 words"
-
-type AiRes struct {
-	Response string `json:"Resp"`
-}
-
 func HandleAiGeneration(w http.ResponseWriter, r *http.Request) {
-	res := AiRes{}
-	response, err := getAiResponse()
+	params := model.PromptMetaData{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&params)
+	res := model.AiRes{}
+	response, err := getAiResponse(params.Prompt)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
@@ -25,7 +24,7 @@ func HandleAiGeneration(w http.ResponseWriter, r *http.Request) {
 
 	handler.RespondWithJson(w, 200, res)
 }
-func getAiResponse() (string, error) {
+func getAiResponse(prompt string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -34,7 +33,7 @@ func getAiResponse() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(PROMPT), nil)
+	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(prompt), nil)
 	if err != nil {
 		return "", err
 
