@@ -31,5 +31,5 @@ build
 # Manim/Python
 media/
 __pycache__/
-*.pyc
+*.py
 .venv/
