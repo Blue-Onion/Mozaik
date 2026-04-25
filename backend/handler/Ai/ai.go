@@ -2,30 +2,12 @@ package ai
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/Blue-Onion/RestApi-Go/config"
-	"github.com/Blue-Onion/RestApi-Go/handler"
-	"github.com/Blue-Onion/RestApi-Go/model"
 	"google.golang.org/genai"
 )
 
-func HandleAiGeneration(w http.ResponseWriter, r *http.Request) {
-	params := model.PromptMetaData{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
-	res := model.AiRes{}
-	response, err := getAiResponse(params.Prompt)
-	if err != nil {
-		handler.RespondWithError(w, 400, err.Error())
-	}
-	res.Response = response
-
-	handler.RespondWithJson(w, 200, res)
-}
-func getAiResponse(userQuery string) (string, error) {
+func GetAiResponse(userQuery string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
