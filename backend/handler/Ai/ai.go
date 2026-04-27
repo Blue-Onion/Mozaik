@@ -19,15 +19,29 @@ func GetAiResponse(userQuery string) (string, error) {
 
 	prompt := fmt.Sprintf(`You are an expert in Manim (Mathematical Animation Engine).
 
-Request: %s
+User Request: %s
 
-Rules (must follow):
-- Output ONLY raw Python code, no markdown, no backticks, no explanations
-- Always import: from manim import *
+You MUST respond in valid JSON ONLY.
+No markdown, no explanations, no extra text.
+
+JSON format:
+{
+  "response": "<python code here>",
+  "className": "GeneratedScene",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "userId": "00000000-0000-0000-0000-000000000000"
+}
+
+Rules for the python code inside "response":
+- Output ONLY raw Python code inside the JSON string
+- Always include: from manim import *
 - The main scene class must be named GeneratedScene and extend Scene
 - Implement the construct(self) method
 - Use only stable Manim CE API (v0.18+)
-- Keep animations clean and readable`, userQuery)
+- Keep animations clean and readable
+- Do NOT include triple backticks
+
+Return ONLY the JSON.`, userQuery)
 	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(prompt), nil)
 	if err != nil {
 		return "", err

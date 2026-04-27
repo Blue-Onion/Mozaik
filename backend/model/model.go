@@ -25,9 +25,10 @@ type AutheticateUser struct {
 	Password string
 }
 type AiRes struct {
-	Response string    `json:"Resp"`
-	ID       uuid.UUID `json:"id"`
-	UserID   uuid.UUID `json:"userId"`
+	Response  string    `json:"response"`
+	ClassName string    `json:"className"`
+	ID        uuid.UUID `json:"id"`
+	UserID    uuid.UUID `json:"userId"`
 }
 
 type PromptMetaData struct {
