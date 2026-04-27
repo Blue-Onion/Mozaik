@@ -7,7 +7,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
-	"github.com/Blue-Onion/RestApi-Go/utlis"
+	"github.com/Blue-Onion/RestApi-Go/utils"
 	"github.com/google/uuid"
 	"net/http"
 	"time"
@@ -36,13 +36,13 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	isValid := utlis.CheckPassword(user.Password, params.Password)
+	isValid := utils.CheckPassword(user.Password, params.Password)
 	if !isValid {
 		handler.RespondWithError(w, 400, "Incorrect Password")
 		return
 
 	}
-	token, err := utlis.GenerateJwt(user.ID)
+	token, err := utils.GenerateJwt(user.ID)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 		return
@@ -83,7 +83,7 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		handler.RespondWithError(w, 400, "Error in Parsing Json")
 		return
 	}
-	hashPass, err := utlis.HashPassword(param.Password)
+	hashPass, err := utils.HashPassword(param.Password)
 	if err != nil {
 		handler.RespondWithError(w, 400, "Error in Hashing Password")
 		return

@@ -7,7 +7,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler/user"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
-	"github.com/Blue-Onion/RestApi-Go/utlis"
+	"github.com/Blue-Onion/RestApi-Go/utils"
 	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
@@ -84,7 +84,7 @@ func TestHandleLogin(t *testing.T) {
 
 	// First create a user to login with
 	password := "password123"
-	hash, _ := utlis.HashPassword(password)
+	hash, _ := utils.HashPassword(password)
 	userData := database.CreateUserParams{
 		ID:        uuid.New(),
 		Name:      "Test User",

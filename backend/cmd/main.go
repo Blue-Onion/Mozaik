@@ -60,14 +60,17 @@ func main() {
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
 	videoRoute := chi.NewRouter()
 	videoRoute.Post("/gen", vgeneration.HandleVideoGeneration)
-	videoRoute.Post("/get-ai-res", ai.HandleAiRes)
+	videoRoute.Post("/get-ai-res", middlewareHandler.MiddlewareAuth(http.HandlerFunc(ai.HandleAiRes)))
 	router.Mount("/api", userRoute)
 
 	router.Mount("/video", videoRoute)
 
 	server := http.Server{
-		Handler: router,
-		Addr:    ":" + cfg.Port,
+		Handler:      router,
+		Addr:         ":" + cfg.Port,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	stop := make(chan os.Signal, 1)

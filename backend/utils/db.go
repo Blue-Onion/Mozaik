@@ -1,4 +1,4 @@
-package utlis
+package utils
 
 import "github.com/Blue-Onion/RestApi-Go/config"
 
