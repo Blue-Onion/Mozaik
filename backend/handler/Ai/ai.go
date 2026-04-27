@@ -2,11 +2,34 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/Blue-Onion/RestApi-Go/config"
+	"github.com/Blue-Onion/RestApi-Go/handler"
+	"github.com/Blue-Onion/RestApi-Go/model"
 	"google.golang.org/genai"
 )
 
+func HandleAiRes(w http.ResponseWriter, r *http.Request) {
+	params := model.PromptMetaData{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&params)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+	}
+	response, err := GetAiResponse(params.Prompt)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+	}
+	res := model.AiRes{}
+	err = json.Unmarshal([]byte(response), &res)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+	}
+	handler.RespondWithJson(w, 200, res)
+}
 func GetAiResponse(userQuery string) (string, error) {
 	apiKey := config.LoadConfig().ApiKey
 	ctx := context.Background()
@@ -40,7 +63,6 @@ Rules for the python code inside "response":
 - Use only stable Manim CE API (v0.18+)
 - Keep animations clean and readable
 - Do NOT include triple backticks
-
 Return ONLY the JSON.`, userQuery)
 	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(prompt), nil)
 	if err != nil {
