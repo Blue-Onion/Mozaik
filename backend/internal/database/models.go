@@ -18,3 +18,11 @@ type User struct {
 	Createdat time.Time
 	Updatedat time.Time
 }
+
+type Video struct {
+	ID        uuid.UUID
+	Userid    uuid.UUID
+	Manimcode string
+	Createdat time.Time
+	Updatedat time.Time
+}
