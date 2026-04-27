@@ -1,5 +1,5 @@
 -- +goose up
-CREATE TABLE videos (
+CREATE TABLE VIDOES (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     manim_code TEXT NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE videos (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 -- +goose down
-drop table videos
+drop table VIDOES
