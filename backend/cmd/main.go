@@ -22,7 +22,7 @@ import (
 
 func main() {
 	//Load Env
-	cfg := config.LoadConfig()
+	cfg := config.GetConfig()
 
 	//DB
 	apiCfg, err := config.DbQuries()

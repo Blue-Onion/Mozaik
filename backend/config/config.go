@@ -22,6 +22,15 @@ type ApiConfig struct {
 	UserRepo database.UserRepository
 }
 
+var config *Config = nil
+
+func GetConfig() *Config {
+	if config == nil {
+		config = LoadConfig()
+	}
+	return config
+}
+
 func getEnvLocation(path string) (string, error) {
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -64,7 +73,7 @@ func LoadConfig() *Config {
 }
 func DbQuries() (*ApiConfig, error) {
 	apiConfig := &ApiConfig{}
-	config := LoadConfig()
+	config := GetConfig()
 	conn, err := sql.Open("postgres", config.DbUrl)
 	if err != nil {
 		return nil, err

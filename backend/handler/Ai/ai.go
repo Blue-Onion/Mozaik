@@ -31,7 +31,7 @@ func HandleAiRes(w http.ResponseWriter, r *http.Request) {
 	handler.RespondWithJson(w, 200, res)
 }
 func GetAiResponse(userQuery string) (string, error) {
-	apiKey := config.LoadConfig().ApiKey
+	apiKey := config.GetConfig().ApiKey
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		APIKey: apiKey,

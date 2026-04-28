@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var JWTSecert []byte = []byte(config.LoadConfig().JWTSecert)
+var JWTSecert []byte = []byte(config.GetConfig().JWTSecert)
 
 func GenerateJwt(userId uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
