@@ -9,8 +9,13 @@ import (
 
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	ai "github.com/Blue-Onion/RestApi-Go/handler/Ai"
+	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
 )
+
+type VideoHandler struct {
+	Repo database.VideoRepository
+}
 
 func generateVideo(a *model.AiRes) error {
 	path := fmt.Sprintf("python/%s/%s.py", a.UserID, a.ID)
@@ -24,23 +29,24 @@ func generateVideo(a *model.AiRes) error {
 	return nil
 }
 
-func HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
+func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
 	params := model.PromptMetaData{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
 	response, err := ai.GetAiResponse(params.Prompt)
+	data := database.CreateVideoParams{
+		ID:        params.ID,
+		Userid:    params.UserID,
+		Manimcode: response,
+	}
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
-	res := model.AiRes{}
-	err = json.Unmarshal([]byte(response), &res)
-	res.ID = params.ID
-	res.UserID = params.UserID
-	err = GenerateFile(&res)
+	video, err := h.Repo.CreateVideo(r.Context(), data)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
-	handler.RespondWithJson(w, 200, res)
+	handler.RespondWithJson(w, 200, video)
 }
 func GenerateFile(aiRes *model.AiRes) error {
 	dir := fmt.Sprintf("python/%s/%s.py", aiRes.UserID, aiRes.ID)

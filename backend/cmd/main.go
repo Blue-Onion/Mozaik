@@ -14,8 +14,8 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/middleware"
 
-	ai "github.com/Blue-Onion/RestApi-Go/handler/Ai"
 	"github.com/Blue-Onion/RestApi-Go/handler/user"
+	vgeneration "github.com/Blue-Onion/RestApi-Go/handler/vGeneration"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 )
@@ -33,6 +33,9 @@ func main() {
 	//Handlers
 	userHandler := &user.Handler{
 		Repo: apiCfg.UserRepo,
+	}
+	VideoHandleandler := &vgeneration.VideoHandler{
+		Repo: apiCfg.VideoRepo,
 	}
 	middlewareHandler := &middleware.Handler{
 		Repo: apiCfg.UserRepo,
@@ -58,7 +61,7 @@ func main() {
 	userRoute.Post("/login", userHandler.HandleLogin)
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
 	videoRoute := chi.NewRouter()
-	videoRoute.Post("/get-ai-res", middlewareHandler.MiddlewareAuth(http.HandlerFunc(ai.HandleAiRes)))
+	videoRoute.Post("/get-ai-res", middlewareHandler.MiddlewareAuth(http.HandlerFunc(VideoHandleandler.HandleCodeGeneration)))
 	router.Mount("/api", userRoute)
 
 	router.Mount("/video", videoRoute)

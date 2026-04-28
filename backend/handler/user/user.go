@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
 	"github.com/Blue-Onion/RestApi-Go/utils"
 	"github.com/google/uuid"
-	"net/http"
-	"time"
 )
 
 type Handler struct {
@@ -43,6 +45,7 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	}
 	token, err := utils.GenerateJwt(user.ID)
+	fmt.Println(token)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 		return

@@ -21,6 +21,7 @@ type Config struct {
 }
 type ApiConfig struct {
 	UserRepo database.UserRepository
+	VideoRepo database.VideoRepository
 }
 
 var (
