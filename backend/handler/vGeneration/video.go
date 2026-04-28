@@ -30,9 +30,13 @@ func generateVideo(a *model.AiRes) error {
 }
 
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("reached HandleCodeGener")
 	params := model.PromptMetaData{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+	}
 	response, err := ai.GetAiResponse(params.Prompt)
 	data := database.CreateVideoParams{
 		ID:        params.ID,
@@ -43,6 +47,7 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 		handler.RespondWithError(w, 400, err.Error())
 	}
 	video, err := h.Repo.CreateVideo(r.Context(), data)
+	fmt.Println(video)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}

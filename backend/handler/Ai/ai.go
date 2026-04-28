@@ -44,26 +44,16 @@ func GetAiResponse(userQuery string) (string, error) {
 
 User Request: %s
 
-You MUST respond in valid JSON ONLY.
-No markdown, no explanations, no extra text.
+Return ONLY Python code.
+No markdown, no JSON, no explanation.
 
-JSON format:
-{
-  "response": "<python code here>",
-  "className": "GeneratedScene",
-  "id": "00000000-0000-0000-0000-000000000000",
-  "userId": "00000000-0000-0000-0000-000000000000"
-}
-
-Rules for the python code inside "response":
-- Output ONLY raw Python code inside the JSON string
+Rules:
 - Always include: from manim import *
-- The main scene class must be named GeneratedScene and extend Scene
-- Implement the construct(self) method
-- Use only stable Manim CE API (v0.18+)
-- Keep animations clean and readable
-- Do NOT include triple backticks
-Return ONLY the JSON.`, userQuery)
+- Main class must be named GeneratedScene(Scene)
+- Implement construct(self)
+- Use Manim CE v0.18+
+- Keep it clean and minimal
+`, userQuery)
 	resp, err := client.Models.GenerateContent(ctx, "models/gemini-2.5-flash", genai.Text(prompt), nil)
 	if err != nil {
 		return "", err

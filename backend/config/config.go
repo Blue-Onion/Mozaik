@@ -20,7 +20,7 @@ type Config struct {
 	ApiKey    string
 }
 type ApiConfig struct {
-	UserRepo database.UserRepository
+	UserRepo  database.UserRepository
 	VideoRepo database.VideoRepository
 }
 
@@ -88,5 +88,6 @@ func DbQuries() (*ApiConfig, error) {
 		return nil, errors.New("Connection Failed")
 	}
 	apiConfig.UserRepo = query
+	apiConfig.VideoRepo = query
 	return apiConfig, nil
 }
