@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/joho/godotenv"
@@ -22,13 +23,16 @@ type ApiConfig struct {
 	UserRepo database.UserRepository
 }
 
-var config *Config = nil
+var (
+	cfg  *Config
+	once sync.Once
+)
 
 func GetConfig() *Config {
-	if config == nil {
-		config = loadConfig()
-	}
-	return config
+	once.Do(func() {
+		cfg = loadConfig()
+	})
+	return cfg
 }
 
 func getEnvLocation(path string) (string, error) {
