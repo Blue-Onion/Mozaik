@@ -24,7 +24,7 @@ func generateVideo(a *model.AiRes) error {
 	return nil
 }
 
-func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
+func HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
 	params := model.PromptMetaData{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
@@ -40,7 +40,6 @@ func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
-	err = generateVideo(&res)
 	handler.RespondWithJson(w, 200, res)
 }
 func GenerateFile(aiRes *model.AiRes) error {
