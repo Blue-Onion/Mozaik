@@ -26,7 +26,7 @@ var config *Config = nil
 
 func GetConfig() *Config {
 	if config == nil {
-		config = LoadConfig()
+		config = loadConfig()
 	}
 	return config
 }
@@ -48,7 +48,7 @@ func getEnvLocation(path string) (string, error) {
 	return getEnvLocation(parent)
 
 }
-func LoadConfig() *Config {
+func loadConfig() *Config {
 	path, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err.Error())
