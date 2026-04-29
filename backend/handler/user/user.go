@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -45,7 +44,6 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	}
 	token, err := utils.GenerateJwt(user.ID)
-	fmt.Println(token)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 		return

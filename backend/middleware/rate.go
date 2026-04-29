@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"math"
 	"net"
 	"net/http"
 	"sync"
@@ -9,13 +10,21 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler"
 )
 
+type bucket struct {
+	token    float64
+	lastSeen time.Time
+}
+
 var (
-	ipInfo  = make(map[string][]time.Time)
+	visitor = make(map[string]*bucket)
 	mu      sync.Mutex
 	maxRate = 5
-	gapTime = 10 * time.Second
+	rate    = 15
 )
 
+func init() {
+	go cleanUp()
+}
 func getIPAddr(r *http.Request) string {
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
@@ -23,28 +32,44 @@ func getIPAddr(r *http.Request) string {
 	}
 	return ip
 }
+func cleanUp() {
+	for range time.Tick(5 * time.Minute) {
+		mu.Lock()
+		for ip, b := range visitor {
+			if time.Since(b.lastSeen) > 5*time.Minute {
+				delete(visitor, ip)
+			}
+
+		}
+		mu.Unlock()
+	}
+}
+func getBucket(ip string) *bucket {
+	b, ok := visitor[ip]
+	if !ok {
+		b = &bucket{
+			token:    float64(maxRate),
+			lastSeen: time.Now(),
+		}
+		visitor[ip] = b
+		return b
+	}
+	elapsed := time.Since(b.lastSeen).Seconds()
+	b.token = math.Min(float64(maxRate), b.token+(elapsed*float64(rate)))
+	b.lastSeen = time.Now()
+	return b
+}
 func MiddlewareRateLimit(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ip := getIPAddr(r)
 		mu.Lock()
 		defer mu.Unlock()
-		value := ipInfo[ip]
-
-		now := time.Now()
-
-		var filter []time.Time
-		for _, t := range value {
-			if now.Sub(t) < gapTime {
-				filter = append(filter, t)
-
-			}
-		}
-		if len(filter) >= maxRate {
-			handler.RespondWithError(w, http.StatusTooManyRequests, "Too Many Req")
+		b := getBucket(ip)
+		if b.token < 1 {
+			handler.RespondWithError(w, http.StatusTooManyRequests, "Too many Request")
 			return
 		}
-		filter = append(filter, time.Now())
-		ipInfo[ip] = filter
+		b.token--
 		next.ServeHTTP(w, r)
 	}
 }
