@@ -1,17 +1,24 @@
-async function testRateLimit() {
-  for (let i = 1; i <= 20; i++) {
-    try {
-      const res = await fetch("http://localhost:3000/health");
-      const text = await res.text();
+async function hitEndpoint(i) {
+  try {
+    const res = await fetch("http://localhost:3000/health");
+    const text = await res.text();
 
-      console.log(`Request ${i}:`, res.status, text);
-    } catch (err) {
-      console.log(`Request ${i}: ERROR`, err.message);
-    }
-
-    // small delay so it's not *too* instant (optional tweak)
-    await new Promise((r) => setTimeout(r, 200));
+    console.log(`Request ${i}:`, res.status, text);
+  } catch (err) {
+    console.log(`Request ${i}: ERROR`, err.message);
   }
 }
 
-testRateLimit();
+async function runTest() {
+  const requests = 20;
+
+  const promises = [];
+
+  for (let i = 1; i <= requests; i++) {
+    promises.push(hitEndpoint(i));
+  }
+
+  await Promise.all(promises);
+}
+
+runTest();
