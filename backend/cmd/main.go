@@ -52,7 +52,7 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	router.Get("/health", handler.Health)
+	router.Get("/health", middleware.MiddlewareRateLimit(http.HandlerFunc(handler.Health)))
 	router.Get("/", handler.MainPage)
 
 	// User Routes

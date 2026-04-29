@@ -20,11 +20,10 @@ func generateVideo(a *model.AiRes) error {
 	path := fmt.Sprintf("python/%s/%s.py", a.UserID, a.ID)
 	className := a.ClassName
 	cmd := exec.Command("manim", "-pql", path, className)
-	stdout, err := cmd.Output()
+	_, err := cmd.Output()
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(stdout))
 	return nil
 }
 func DummyAiRes() string {
@@ -66,10 +65,12 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 	}
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
+		return
 	}
 	video, err := h.Repo.CreateVideo(r.Context(), data)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
+		return
 	}
 	handler.RespondWithJson(w, 200, video)
 }
