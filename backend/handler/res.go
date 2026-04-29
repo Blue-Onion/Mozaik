@@ -17,6 +17,7 @@ func RespondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Add("Content-type", "Application/Json")
 	w.WriteHeader(code)
 	w.Write(data)
+	return
 
 }
 func RespondWithError(w http.ResponseWriter, code int, msg string) {
@@ -42,7 +43,7 @@ func RespondWithHTML(w http.ResponseWriter, code int, payload string) {
 	w.WriteHeader(code)
 	w.Write([]byte(payload))
 }
-func MainPage(w http.ResponseWriter, r *http.Request){
+func MainPage(w http.ResponseWriter, r *http.Request) {
 	content, err := os.ReadFile("template/index.html")
 	if err != nil {
 		RespondWithError(w, 500, "Could not read template")
