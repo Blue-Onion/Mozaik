@@ -8,7 +8,6 @@ import (
 	"os/exec"
 
 	"github.com/Blue-Onion/RestApi-Go/handler"
-	ai "github.com/Blue-Onion/RestApi-Go/handler/Ai"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
 )
@@ -28,16 +27,38 @@ func generateVideo(a *model.AiRes) error {
 	fmt.Println(string(stdout))
 	return nil
 }
+func DummyAiRes() string {
 
+	res := `from manim import *
+import numpy as np
+
+class GeneratedScene(ThreeDScene):
+    def construct(self):
+        self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
+				
+        cube = Cube(
+            side_length=2,
+            fill_opacity=0.8,
+            fill_color=BLUE_D,
+            stroke_color=WHITE
+        )
+        self.add(cube)
+
+        self.play(
+            Rotate(cube, axis=np.array([1, 1, 0]), angle=2 * PI, run_time=3, rate_func=linear)
+        )
+        self.wait(1)
+`
+	return res
+}
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("reached HandleCodeGener")
 	params := model.PromptMetaData{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
-	response, err := ai.GetAiResponse(params.Prompt)
+	response := DummyAiRes()
 	data := database.CreateVideoParams{
 		ID:        params.ID,
 		Userid:    params.UserID,
@@ -47,7 +68,6 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 		handler.RespondWithError(w, 400, err.Error())
 	}
 	video, err := h.Repo.CreateVideo(r.Context(), data)
-	fmt.Println(video)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
