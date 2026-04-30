@@ -18,6 +18,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// newAuthenticatedRequest creates an http.Request with a database.User
+// injected into the context under the "user" key, matching what
+// MiddlewareAuth does in production.
+func newAuthenticatedRequest(method, url string, body []byte, user database.User) *http.Request {
+	req, _ := http.NewRequest(method, url, bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	ctx := context.WithValue(req.Context(), "user", user)
+	return req.WithContext(ctx)
+}
+
 // ---------------------------------------------------------------------------
 // MockVideoRepo — in-memory implementation of database.VideoRepository
 // ---------------------------------------------------------------------------
@@ -94,18 +104,19 @@ func TestHandleCodeGeneration_Success(t *testing.T) {
 	mockRepo := &MockVideoRepo{}
 	h := &vgeneration.VideoHandler{Repo: mockRepo}
 
-	params := model.PromptMetaData{
-		ID:     uuid.New(),
-		UserID: uuid.New(),
-		Prompt: "animate a rotating cube",
+	fakeUser := database.User{
+		ID:    uuid.New(),
+		Name:  "test-user",
+		Email: "test@example.com",
 	}
-	body, err := json.Marshal(params)
+
+	prompt := model.Prompt{Prompt: "animate a rotating cube"}
+	body, err := json.Marshal(prompt)
 	if err != nil {
 		t.Fatalf("failed to marshal request body: %v", err)
 	}
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/video/generate", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
+	req := newAuthenticatedRequest(http.MethodPost, "/api/video/generate", body, fakeUser)
 	rr := httptest.NewRecorder()
 
 	h.HandleCodeGeneration(rr, req)
@@ -119,11 +130,9 @@ func TestHandleCodeGeneration_Success(t *testing.T) {
 		t.Fatalf("could not decode response body: %v", err)
 	}
 
-	if video.ID != params.ID {
-		t.Errorf("video ID mismatch: got %v, want %v", video.ID, params.ID)
-	}
-	if video.Userid != params.UserID {
-		t.Errorf("video UserID mismatch: got %v, want %v", video.Userid, params.UserID)
+	// UserID should come from context, not the request body
+	if video.Userid != fakeUser.ID {
+		t.Errorf("video UserID mismatch: got %v, want %v", video.Userid, fakeUser.ID)
 	}
 	if video.Manimcode == "" {
 		t.Error("expected non-empty Manimcode in created video")
@@ -136,6 +145,26 @@ func TestHandleCodeGeneration_Success(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// HandleCodeGeneration — no user in context (unauthorized)
+// ---------------------------------------------------------------------------
+
+func TestHandleCodeGeneration_Unauthorized(t *testing.T) {
+	mockRepo := &MockVideoRepo{}
+	h := &vgeneration.VideoHandler{Repo: mockRepo}
+
+	// Request WITHOUT a user in context — should be rejected
+	req, _ := http.NewRequest(http.MethodPost, "/api/video/generate", bytes.NewBufferString(`{"prompt":"test"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+
+	h.HandleCodeGeneration(rr, req)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing user context, got %d", rr.Code)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // HandleCodeGeneration — invalid JSON body
 // ---------------------------------------------------------------------------
 
@@ -143,8 +172,8 @@ func TestHandleCodeGeneration_InvalidBody(t *testing.T) {
 	mockRepo := &MockVideoRepo{}
 	h := &vgeneration.VideoHandler{Repo: mockRepo}
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/video/generate", bytes.NewBufferString("not-json"))
-	req.Header.Set("Content-Type", "application/json")
+	fakeUser := database.User{ID: uuid.New(), Name: "u", Email: "u@x.com"}
+	req := newAuthenticatedRequest(http.MethodPost, "/api/video/generate", []byte("not-json"), fakeUser)
 	rr := httptest.NewRecorder()
 
 	h.HandleCodeGeneration(rr, req)
@@ -162,15 +191,11 @@ func TestHandleCodeGeneration_RepoError(t *testing.T) {
 	mockRepo := &MockVideoRepo{Err: errors.New("db connection failed")}
 	h := &vgeneration.VideoHandler{Repo: mockRepo}
 
-	params := model.PromptMetaData{
-		ID:     uuid.New(),
-		UserID: uuid.New(),
-		Prompt: "animate a sphere",
-	}
-	body, _ := json.Marshal(params)
+	fakeUser := database.User{ID: uuid.New(), Name: "u", Email: "u@x.com"}
+	prompt := model.Prompt{Prompt: "animate a sphere"}
+	body, _ := json.Marshal(prompt)
 
-	req, _ := http.NewRequest(http.MethodPost, "/api/video/generate", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
+	req := newAuthenticatedRequest(http.MethodPost, "/api/video/generate", body, fakeUser)
 	rr := httptest.NewRecorder()
 
 	h.HandleCodeGeneration(rr, req)

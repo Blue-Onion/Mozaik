@@ -13,7 +13,7 @@ import (
 )
 
 func HandleAiRes(w http.ResponseWriter, r *http.Request) {
-	params := model.PromptMetaData{}
+	params := model.Prompt{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
 	if err != nil {

@@ -31,8 +31,6 @@ type AiRes struct {
 	UserID    uuid.UUID `json:"userId"`
 }
 
-type PromptMetaData struct {
-	ID     uuid.UUID `json:"id"`
-	UserID uuid.UUID `json:"userId"`
-	Prompt string    `json:"prompt"`
+type Prompt struct {
+	Prompt string `json:"prompt"`
 }

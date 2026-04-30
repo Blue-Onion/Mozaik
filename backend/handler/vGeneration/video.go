@@ -10,6 +10,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
+	"github.com/google/uuid"
 )
 
 type VideoHandler struct {
@@ -51,7 +52,13 @@ class GeneratedScene(ThreeDScene):
 	return res
 }
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
-	params := model.PromptMetaData{}
+	user, ok := r.Context().Value("user").(database.User)
+	if !ok {
+
+		handler.RespondWithError(w, 400, "Unauthorized")
+		return
+	}
+	params := model.Prompt{}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&params)
 	if err != nil {
@@ -59,8 +66,8 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 	}
 	response := DummyAiRes()
 	data := database.CreateVideoParams{
-		ID:        params.ID,
-		Userid:    params.UserID,
+		ID:        uuid.New(),
+		Userid:    user.ID,
 		Manimcode: response,
 	}
 	if err != nil {
