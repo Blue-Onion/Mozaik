@@ -42,6 +42,7 @@ func main() {
 	}
 
 	//Server
+
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://*", "https://*"},
@@ -51,13 +52,14 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-
-	router.Get("/health", middleware.MiddlewareRateLimit(http.HandlerFunc(handler.Health)))
+	router.Use(middleware.MiddlewareRateLimit)
+	router.Get("/health", handler.Health)
 	router.Get("/", handler.MainPage)
 
 	// User Routes
 	userRoute := chi.NewRouter()
-	userRoute.Post("/users", userHandler.HandleCreateUser)
+	userRoute.Post("/create-users", userHandler.HandleCreateUser)
+	userRoute.Get("/get-user/{id}", userHandler.HandleGetUser)
 	userRoute.Post("/login", userHandler.HandleLogin)
 	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
 	videoRoute := chi.NewRouter()

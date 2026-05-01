@@ -30,7 +30,6 @@ type AiRes struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    uuid.UUID `json:"userId"`
 }
-
 type Prompt struct {
 	Prompt string `json:"prompt"`
 }

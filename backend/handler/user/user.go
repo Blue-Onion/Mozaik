@@ -11,6 +11,7 @@ import (
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/model"
 	"github.com/Blue-Onion/RestApi-Go/utils"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 )
 
@@ -103,4 +104,20 @@ func (h *Handler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handler.RespondWithJson(w, 201, user)
+}
+func (h *Handler) HandleGetUser(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		handler.RespondWithError(w, http.StatusNotExtended, err.Error())
+		return
+	}
+	user, err := h.Repo.GetUser(r.Context(), id)
+
+	if err != nil {
+		handler.RespondWithError(w, http.StatusNotExtended, err.Error())
+		return
+	}
+	handler.RespondWithJson(w, http.StatusAccepted, user)
 }

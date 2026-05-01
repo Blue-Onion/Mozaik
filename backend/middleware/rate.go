@@ -1,13 +1,12 @@
 package middleware
 
 import (
+	"github.com/Blue-Onion/RestApi-Go/handler"
 	"math"
 	"net"
 	"net/http"
 	"sync"
 	"time"
-
-	"github.com/Blue-Onion/RestApi-Go/handler"
 )
 
 type bucket struct {
@@ -39,7 +38,6 @@ func cleanUp() {
 			if time.Since(b.lastSeen) > 5*time.Minute {
 				delete(visitor, ip)
 			}
-
 		}
 		mu.Unlock()
 	}
@@ -59,8 +57,8 @@ func getBucket(ip string) *bucket {
 	b.lastSeen = time.Now()
 	return b
 }
-func MiddlewareRateLimit(next http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func MiddlewareRateLimit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip := getIPAddr(r)
 		mu.Lock()
 		defer mu.Unlock()
@@ -71,5 +69,5 @@ func MiddlewareRateLimit(next http.Handler) http.HandlerFunc {
 		}
 		b.token--
 		next.ServeHTTP(w, r)
-	}
+	})
 }

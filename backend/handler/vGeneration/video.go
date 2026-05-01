@@ -27,6 +27,10 @@ func generateVideo(a *model.AiRes) error {
 	}
 	return nil
 }
+func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
+	// user := r.Context().Value("user")
+
+}
 func DummyAiRes() string {
 
 	res := `from manim import *
@@ -54,7 +58,6 @@ class GeneratedScene(ThreeDScene):
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value("user").(database.User)
 	if !ok {
-
 		handler.RespondWithError(w, 400, "Unauthorized")
 		return
 	}
