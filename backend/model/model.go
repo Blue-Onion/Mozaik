@@ -33,3 +33,6 @@ type AiRes struct {
 type Prompt struct {
 	Prompt string `json:"prompt"`
 }
+type VideoParams struct {
+	Id string `json:"id"`
+}

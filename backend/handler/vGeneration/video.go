@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/middleware"
 	"github.com/Blue-Onion/RestApi-Go/model"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 )
 
@@ -21,9 +23,17 @@ type VideoHandler struct {
 	Repo database.VideoRepository
 }
 
-func generateVideo(a *model.AiRes) error {
-	path := fmt.Sprintf("python/%s/%s.py", a.UserID, a.ID)
-	className := a.ClassName
+func getFuckingClassName(code string) string {
+	var className string
+	start := strings.Index(code, "class")
+	end := strings.Index(code, `(`)
+	className = code[start+6 : end]
+	return className
+}
+
+func generateVideo(a *database.Video) error {
+	path := fmt.Sprintf("python/%s/%s.py", a.Userid, a.ID)
+	className := getFuckingClassName(a.Manimcode)
 	cmd := exec.Command("manim", "-pql", path, className)
 	_, err := cmd.Output()
 	if err != nil {
@@ -31,11 +41,31 @@ func generateVideo(a *model.AiRes) error {
 	}
 	return nil
 }
-func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user")
-
-	handler.RespondWithJson(w, http.StatusAccepted, user)
-
+func (h *VideoHandler) HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
+	paramId := chi.URLParam(r, "id")
+	user := r.Context().Value("user").(middleware.User)
+	id, err := uuid.Parse(paramId)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	filePath := fmt.Sprintf("python/%s/%s.py", user.ID, id)
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	video := database.Video{
+		ID:        id,
+		Userid:    user.ID,
+		Manimcode: string(content),
+	}
+	err = generateVideo(&video)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	handler.RespondWithJson(w, 200, video)
 }
 func DummyAiRes() string {
 
