@@ -88,14 +88,19 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 		handler.RespondWithError(w, 400, err.Error())
 		return
 	}
+	err = GenerateFile(&video)
 	handler.RespondWithJson(w, 200, video)
 }
-func GenerateFile(aiRes *model.AiRes) error {
-	dir := fmt.Sprintf("python/%s/%s.py", aiRes.UserID, aiRes.ID)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+func GenerateFile(video *database.Video) error {
+	dir := fmt.Sprintf("python/%s", video.Userid)
+	_, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dir, 0755)
+		}
 	}
-
-	fileName := fmt.Sprintf("%s/%s.py", dir, aiRes.ID)
-	return os.WriteFile(fileName, []byte(aiRes.Response), 0644)
+	filePath := fmt.Sprintf("%s/%s.py", dir, video.ID)
+	content := []byte(video.Manimcode)
+	err = os.WriteFile(filePath, content, 0644)
+	return nil
 }
