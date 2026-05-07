@@ -9,10 +9,14 @@ import (
 
 	"github.com/Blue-Onion/RestApi-Go/handler"
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
+	"github.com/Blue-Onion/RestApi-Go/middleware"
 	"github.com/Blue-Onion/RestApi-Go/model"
 	"github.com/google/uuid"
 )
 
+type VideoParams struct {
+	id uuid.UUID
+}
 type VideoHandler struct {
 	Repo database.VideoRepository
 }
@@ -28,7 +32,9 @@ func generateVideo(a *model.AiRes) error {
 	return nil
 }
 func HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
-	// user := r.Context().Value("user")
+	user := r.Context().Value("user")
+
+	handler.RespondWithJson(w, http.StatusAccepted, user)
 
 }
 func DummyAiRes() string {
@@ -56,7 +62,7 @@ class GeneratedScene(ThreeDScene):
 	return res
 }
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
-	user, ok := r.Context().Value("user").(database.User)
+	user, ok := r.Context().Value("user").(middleware.User)
 	if !ok {
 		handler.RespondWithError(w, 400, "Unauthorized")
 		return

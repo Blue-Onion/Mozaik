@@ -19,28 +19,32 @@ func GenerateJwt(userId uuid.UUID) (string, error) {
 		"iat":    time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(JWTSecert)
+	userToken, err := token.SignedString(JWTSecert)
+	if err != nil {
+		return "", err
+	}
+	return userToken, nil
 
 }
-func GetUserIdJwt(cookie *http.Cookie) (string,error){
-	tokenString:=cookie.Value
-	token,err:=jwt.Parse(tokenString,func(t *jwt.Token) (interface{}, error) {
+func GetUserIdJwt(cookie *http.Cookie) (string, error) {
+	tokenString := cookie.Value
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")
 		}
-		return JWTSecert,nil
+		return JWTSecert, nil
 	})
-	if err!=nil||!token.Valid{
-		return "",err
+	if err != nil || !token.Valid {
+		return "", err
 	}
-	claims,ok:=token.Claims.(jwt.MapClaims)
-	if !ok{
-		return "",err
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", err
 	}
 	userID, ok := claims["userId"].(string)
-    if !ok {
-        return "", err
-    }
+	if !ok {
+		return "", err
+	}
 
-    return userID, nil
+	return userID, nil
 }

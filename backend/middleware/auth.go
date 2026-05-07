@@ -13,6 +13,11 @@ import (
 type Handler struct {
 	Repo database.UserRepository
 }
+type User struct {
+	ID    uuid.UUID
+	Name  string
+	Email string
+}
 
 func (h Handler) MiddlewareAuth(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +45,12 @@ func (h Handler) MiddlewareAuth(next http.Handler) http.HandlerFunc {
 				handler.RespondWithError(w, http.StatusUnauthorized, "Unauthorized: user not found")
 				return
 			}
-
-			ctx := context.WithValue(r.Context(), "user", user)
+			userInfo := User{
+				ID:    id,
+				Name:  user.Name,
+				Email: user.Email,
+			}
+			ctx := context.WithValue(r.Context(), "user", userInfo)
 			next.ServeHTTP(w, r.WithContext(ctx))
 
 		}

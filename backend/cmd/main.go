@@ -44,6 +44,7 @@ func main() {
 	//Server
 
 	router := chi.NewRouter()
+	router.Use(middleware.MiddlewareRateLimit)
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://*", "https://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -52,7 +53,6 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	router.Use(middleware.MiddlewareRateLimit)
 	router.Get("/health", handler.Health)
 	router.Get("/", handler.MainPage)
 

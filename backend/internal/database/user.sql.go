@@ -80,7 +80,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (GetUserRow, error)
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name password FROM users WHERE email = $1
+SELECT id, password FROM users WHERE email = $1
 `
 
 type GetUserByEmailRow struct {
