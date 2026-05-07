@@ -57,15 +57,10 @@ func main() {
 	router.Get("/", handler.MainPage)
 
 	// User Routes
-	userRoute := chi.NewRouter()
-	userRoute.Post("/create-users", userHandler.HandleCreateUser)
-	userRoute.Get("/get-user/{id}", userHandler.HandleGetUser)
-	userRoute.Post("/login", userHandler.HandleLogin)
-	userRoute.Post("/logOut", middlewareHandler.MiddlewareAuth(http.HandlerFunc(userHandler.HandleLogOut)))
-	videoRoute := chi.NewRouter()
-	videoRoute.Post("/get-ai-res", middlewareHandler.MiddlewareAuth(http.HandlerFunc(VideoHandleandler.HandleCodeGeneration)))
+	userRoute := user.Routes(userHandler, middlewareHandler)
 	router.Mount("/api", userRoute)
 
+	videoRoute := vgeneration.VideoGenerationRoute(VideoHandleandler, middlewareHandler)
 	router.Mount("/video", videoRoute)
 
 	server := http.Server{

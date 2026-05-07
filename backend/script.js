@@ -1,24 +1,48 @@
-async function hitEndpoint(i) {
+// update_script.js
+
+const userId = "a0686053-7d6e-4e03-93d9-3e36327a2bdf";
+const API_BASE_URL = "http://localhost:3000/api";
+
+async function getUserData(iteration) {
   try {
-    const res = await fetch("http://localhost:3000/health");
-    const text = await res.text();
+    const response = await fetch(`${API_BASE_URL}/get-user/${userId}`);
 
-    console.log(`Request ${i}:`, res.status, text);
-  } catch (err) {
-    console.log(`Request ${i}: ERROR`, err.message);
+    let data;
+    try {
+      data = await response.json();
+    } catch (err) {
+      data = { message: "Response not JSON" };
+    }
+
+    if (!response.ok) {
+      console.error(
+        `\n[${iteration}] Failed (${response.status}):\n`,
+        JSON.stringify(data, null, 2)
+      );
+      return;
+    }
+
+    console.log(
+      `\n[${iteration}] Success (${response.status}):\n`,
+      JSON.stringify(data, null, 2)
+    );
+  } catch (error) {
+    console.error(`[${iteration}] Fetch Error:`, error.message);
   }
 }
 
-async function runTest() {
-  const requests = 20;
+async function runLoadTest() {
+  console.log(`Starting parallel load test (100 requests)...`);
+  const startTime = Date.now();
 
-  const promises = [];
+  const requests = Array.from({ length: 100 }, (_, i) =>
+    getUserData(i + 1)
+  );
 
-  for (let i = 1; i <= requests; i++) {
-    promises.push(hitEndpoint(i));
-  }
+  await Promise.all(requests);
 
-  await Promise.all(promises);
+  const duration = (Date.now() - startTime) / 1000;
+  console.log(`\nFinished 100 requests in ${duration} seconds.`);
 }
 
-runTest();
+runLoadTest();

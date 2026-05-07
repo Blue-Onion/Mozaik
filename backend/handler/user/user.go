@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+
 	"net/http"
 	"time"
 
@@ -116,8 +117,18 @@ func (h *Handler) HandleGetUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.Repo.GetUser(r.Context(), id)
 
 	if err != nil {
-		handler.RespondWithError(w, http.StatusNotExtended, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+
+			handler.RespondWithError(w, 404, "User not found")
+			return
+		}
+		handler.RespondWithError(w, 400, err.Error())
 		return
+
 	}
 	handler.RespondWithJson(w, http.StatusAccepted, user)
+}
+
+func (h *Handler) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
+
 }
