@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	"net/http"
 	"time"
@@ -29,7 +28,6 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		handler.RespondWithError(w, 400, "Error in Parsing Json")
 		return
 	}
-	fmt.Println(params)
 	user, err := h.Repo.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

@@ -19,6 +19,12 @@ func RespondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(data)
 
 }
+func RespondWithVideo(w http.ResponseWriter, code int, r *http.Request, filePath string) {
+	w.Header().Set("Content-Type", "video/mp4")
+	w.Header().Set("Accept-Ranges", "bytes")
+	http.ServeFile(w, r, filePath)
+
+}
 func RespondWithError(w http.ResponseWriter, code int, msg string) {
 	if code > 499 {
 		log.Println("Responding with 5xx error", msg)

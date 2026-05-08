@@ -31,15 +31,15 @@ func getFuckingClassName(code string) string {
 	return className
 }
 
-func generateVideo(a *database.Video) error {
+func generateVideo(a *database.Video) (string, error) {
 	path := fmt.Sprintf("python/%s/%s.py", a.Userid, a.ID)
 	className := getFuckingClassName(a.Manimcode)
-	cmd := exec.Command("manim", "-pql", path, className)
+	cmd := exec.Command("manim", "-ql", path, className)
 	_, err := cmd.Output()
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return className, nil
 }
 func (h *VideoHandler) HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
 	paramId := chi.URLParam(r, "id")
@@ -60,12 +60,13 @@ func (h *VideoHandler) HandleVideoGeneration(w http.ResponseWriter, r *http.Requ
 		Userid:    user.ID,
 		Manimcode: string(content),
 	}
-	err = generateVideo(&video)
+	className, err := generateVideo(&video)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 		return
 	}
-	handler.RespondWithJson(w, 200, video)
+	videoPath := fmt.Sprintf("media/videos/%s/480p15/%s.mp4", id, className)
+	handler.RespondWithVideo(w, 200, r, videoPath)
 }
 func DummyAiRes() string {
 
