@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Blue-Onion/RestApi-Go/handler"
+
 	"github.com/Blue-Onion/RestApi-Go/internal/database"
 	"github.com/Blue-Onion/RestApi-Go/middleware"
 	"github.com/Blue-Onion/RestApi-Go/model"
@@ -43,7 +44,11 @@ func generateVideo(a *database.Video) (string, error) {
 }
 func (h *VideoHandler) HandleVideoGeneration(w http.ResponseWriter, r *http.Request) {
 	paramId := chi.URLParam(r, "id")
-	user := r.Context().Value("user").(middleware.User)
+	user, ok := r.Context().Value("user").(middleware.User)
+	if !ok {
+		handler.RespondWithError(w, 400, "Unauthorized")
+		return
+	}
 	id, err := uuid.Parse(paramId)
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
@@ -68,7 +73,7 @@ func (h *VideoHandler) HandleVideoGeneration(w http.ResponseWriter, r *http.Requ
 	videoPath := fmt.Sprintf("media/videos/%s/480p15/%s.mp4", id, className)
 	handler.RespondWithVideo(w, 200, r, videoPath)
 }
-func DummyAiRes() string {
+func DummyAiRes(a string) (string,error) {
 
 	res := `from manim import *
 import numpy as np
@@ -90,7 +95,7 @@ class GeneratedScene(ThreeDScene):
         )
         self.wait(1)
 `
-	return res
+	return res,nil
 }
 func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Request) {
 	user, ok := r.Context().Value("user").(middleware.User)
@@ -104,7 +109,7 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		handler.RespondWithError(w, 400, err.Error())
 	}
-	response := DummyAiRes()
+	response, err := DummyAiRes(params.Prompt)
 	data := database.CreateVideoParams{
 		ID:        uuid.New(),
 		Userid:    user.ID,
@@ -121,6 +126,43 @@ func (h *VideoHandler) HandleCodeGeneration(w http.ResponseWriter, r *http.Reque
 	}
 	err = GenerateFile(&video)
 	handler.RespondWithJson(w, 200, video)
+}
+func (h *VideoHandler) HandleGetCode(w http.ResponseWriter, r *http.Request) {
+
+	paramId := chi.URLParam(r, "id")
+	user, ok := r.Context().Value("user").(middleware.User)
+	if !ok {
+		handler.RespondWithError(w, 400, "Unauthorized")
+		return
+	}
+	id, err := uuid.Parse(paramId)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	videoParams := database.GetVideoParams{
+		ID:     id,
+		Userid: user.ID,
+	}
+	code, err := h.Repo.GetVideo(r.Context(), videoParams)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	handler.RespondWithJson(w, 200, code)
+}
+func (h *VideoHandler) HandleGetAllCode(w http.ResponseWriter, r *http.Request) {
+	user, ok := r.Context().Value("user").(middleware.User)
+	if !ok {
+		handler.RespondWithError(w, 400, "Unauthorized")
+		return
+	}
+	codes, err := h.Repo.GetAllVideos(r.Context(), user.ID)
+	if err != nil {
+		handler.RespondWithError(w, 400, err.Error())
+		return
+	}
+	handler.RespondWithJson(w, 200, codes)
 }
 func GenerateFile(video *database.Video) error {
 	dir := fmt.Sprintf("python/%s", video.Userid)
